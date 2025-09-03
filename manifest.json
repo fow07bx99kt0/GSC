@@ -1,0 +1,48 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "b3a4a0b1-1c2d-4a3b-a9e9-0000sgc00001",
+  "packageName": "com.corpal.sgc",
+  "developer": {
+    "name": "Corpal",
+    "websiteUrl": "https://SEUUSUARIO.github.io/sgc-teams-app",
+    "privacyUrl": "https://SEUUSUARIO.github.io/sgc-teams-app",
+    "termsOfUseUrl": "https://SEUUSUARIO.github.io/sgc-teams-app"
+  },
+  "name": {
+    "short": "SGC",
+    "full": "SGC — Sistema de Gestão do Conhecimento"
+  },
+  "description": {
+    "short": "Hub de conhecimento para Políticas, Manuais, Modelos e mais.",
+    "full": "Aplicativo de aba no Teams para organizar e acessar rapidamente documentos da Corpal (Políticas, Manuais, Modelos, BackOffice, Engenharia, Negócios e Lista Mestra)."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#10b981",
+  "staticTabs": [
+    {
+      "entityId": "sgc-home",
+      "name": "SGC",
+      "contentUrl": "https://SEUUSUARIO.github.io/sgc-teams-app/index.html",
+      "websiteUrl": "https://SEUUSUARIO.github.io/sgc-teams-app/index.html",
+      "scopes": [
+        "team",
+        "groupchat",
+        "personal"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "SEUUSUARIO.github.io",
+    "github.io",
+    "corpalloteamentos.sharepoint.com"
+  ]
+}

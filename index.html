@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SGC — Sistema de Gestão do Conhecimento</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: light; }
+    .card:hover { transform: translateY(-2px); }
+    .fade-in { animation: fade-in 240ms ease-out; }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none;} }
+    .iframe-wrap { height: calc(100vh - 170px); }
+    /* Hide Teams top bar scrollbar if any */
+    html, body { height: 100%; }
+  </style>
+</head>
+<body class="bg-white text-neutral-800">
+  <header class="px-4 sm:px-6 lg:px-10 py-5 border-b bg-white/70 backdrop-blur sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-emerald-500 flex items-center justify-center text-white font-bold">SGC</div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-semibold">Sistema de Gestão do Conhecimento</h1>
+          <p class="text-xs text-neutral-500 -mt-0.5">Corpal • ISO 30401 inspired</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="backBtn" class="hidden px-3 py-2 rounded-xl border text-sm hover:bg-neutral-50">Voltar</button>
+        <a id="openNewTab" href="#" target="_blank" rel="noopener" class="hidden px-3 py-2 rounded-xl border text-sm hover:bg-neutral-50">Abrir em nova aba</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6">
+    <!-- GRID -->
+    <section id="grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- Cards injected by JS -->
+    </section>
+
+    <!-- VIEWER -->
+    <section id="viewer" class="hidden fade-in">
+      <div class="mb-3">
+        <h2 id="viewerTitle" class="text-base font-semibold"></h2>
+        <p class="text-xs text-neutral-500">Se o conteúdo não carregar dentro do aplicativo, use “Abrir em nova aba”.</p>
+      </div>
+      <div class="border rounded-xl overflow-hidden iframe-wrap">
+        <iframe id="contentFrame" src="" class="w-full h-full" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 text-xs text-neutral-400">
+    <div class="flex items-center justify-between">
+      <span>© Corpal — SGC</span>
+      <a href="#" class="hover:text-neutral-600" id="resetApp">Voltar ao início</a>
+    </div>
+  </footer>
+
+  <script>
+    // ====== CONFIGURAR AQUI ======
+    // Dica: se algum link bloquear em iframe, o botão "Abrir em nova aba" já fica disponível.
+    const CATEGORIES = [
+      {
+        key: "politicas",
+        title: "Políticas",
+        icon: "assets/icons/politicas.svg",
+        url: "https://corpalloteamentos.sharepoint.com/:f:/s/Corpal/Ej2irJ5cZqVFnucS0ZdM2k4BMUkrfA9-CzDxzu7Y-uPedA?e=vo1JYy"
+      },
+      {
+        key: "manuais",
+        title: "Manuais",
+        icon: "assets/icons/manuais.svg",
+        url: "https://corpalloteamentos.sharepoint.com/:f:/s/Corpal/Etl-sMgvSEJAjILNm91fVWgBcx3to3LOH2LPWuVWqJK03A?e=URQ6LP"
+      },
+      {
+        key: "modelos",
+        title: "Modelo de documentos",
+        icon: "assets/icons/modelos.svg",
+        url: "https://corpalloteamentos.sharepoint.com/:f:/s/Corpal/Ei_klHEBwkBEgEfa73GoqJoBzCaytV0EhqlHj93zm1zRkQ?e=H5PT1g"
+      },
+      {
+        key: "backoffice",
+        title: "BackOffice",
+        icon: "assets/icons/backoffice.svg",
+        url: "https://corpalloteamentos.sharepoint.com/:f:/s/Corpal/EtlFy9qMJBRFoxii5Gef9WIBbHG1VGix4aUHNI9u-1QMBg?e=qmJkJc"
+      },
+      {
+        key: "engenharia",
+        title: "Engenharia",
+        icon: "assets/icons/engenharia.svg",
+        url: "https://corpalloteamentos.sharepoint.com/:f:/s/Corpal/EpHxiROLYTpKhHhUCjJG7BUBOGLrkX151PCb3swmoso3Hw?e=wVQnPt"
+      },
+      {
+        key: "negocios",
+        title: "Negócios",
+        icon: "assets/icons/negocios.svg",
+        url: "https://corpalloteamentos.sharepoint.com/:f:/s/Corpal/EiYLWBb8wcdAkeSwNcFpeo4BfKc_v3I-KxLQnmeSoJznXw?e=lWh7oW"
+      },
+      {
+        key: "lista-mestra",
+        title: "Lista Mestre de Documentos",
+        icon: "assets/icons/lista-mestra.svg",
+        url: "https://corpalloteamentos.sharepoint.com/:x:/s/Corpal/ETjTb5nxf21AjgPWFlGBWn0Bfe4KON7Yct3bqBtiYMWxnQ?e=gbqOAR"
+      }
+    ];
+
+    // ====== UI Logic ======
+    const grid = document.getElementById("grid");
+    const viewer = document.getElementById("viewer");
+    const viewerTitle = document.getElementById("viewerTitle");
+    const contentFrame = document.getElementById("contentFrame");
+    const backBtn = document.getElementById("backBtn");
+    const openNewTab = document.getElementById("openNewTab");
+    const resetApp = document.getElementById("resetApp");
+
+    function cardTemplate(item) {
+      return `
+        <button class="card bg-white border rounded-2xl p-4 text-left hover:shadow transition" data-url="${item.url}" data-title="${item.title}">
+          <img src="${item.icon}" alt="" class="w-12 h-12 mb-3">
+          <h3 class="text-sm font-semibold">${item.title}</h3>
+          <p class="text-xs text-neutral-500 mt-0.5">Clique para abrir</p>
+        </button>
+      `;
+    }
+
+    function buildGrid() {
+      grid.innerHTML = CATEGORIES.map(cardTemplate).join("");
+      grid.querySelectorAll(".card").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const url = normalizeUrl(btn.dataset.url);
+          openCategory(btn.dataset.title, url);
+        });
+      });
+    }
+
+    function normalizeUrl(raw) {
+      // Força o parâmetro ?web=1 (reduz a UI do SharePoint) e preserva tokens.
+      try {
+        const u = new URL(raw);
+        if (!u.searchParams.has("web")) u.searchParams.set("web", "1");
+        return u.toString();
+      } catch(e) {
+        return raw;
+      }
+    }
+
+    function openCategory(title, url) {
+      viewerTitle.textContent = title;
+      grid.classList.add("hidden");
+      viewer.classList.remove("hidden");
+      backBtn.classList.remove("hidden");
+      openNewTab.classList.remove("hidden");
+      contentFrame.src = url;
+      openNewTab.href = url;
+      // Fallback se iframe falhar
+      let watchdog = setTimeout(() => {
+        // mantém o botão "Abrir em nova aba" como plano B
+        console.warn("Possível bloqueio de embedding pelo SharePoint.");
+      }, 3000);
+      contentFrame.onload = () => clearTimeout(watchdog);
+    }
+
+    function goBack() {
+      viewer.classList.add("hidden");
+      grid.classList.remove("hidden");
+      backBtn.classList.add("hidden");
+      openNewTab.classList.add("hidden");
+      contentFrame.src = "about:blank";
+    }
+
+    backBtn.addEventListener("click", goBack);
+    resetApp.addEventListener("click", (e) => { e.preventDefault(); goBack(); });
+
+    buildGrid();
+  </script>
+</body>
+</html>
